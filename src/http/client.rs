@@ -19,7 +19,7 @@ impl<'a> Client<'a> {
 
     /// Send an HTTP request.
     pub async fn send<B: Body>(&self, req: Request<B>) -> Result<Response<IncomingBody>> {
-        let (wasi_req, body) = req.into_outgoing();
+        let (wasi_req, body) = req.into_outgoing()?;
         let wasi_body = wasi_req.body().unwrap();
         let body_stream = wasi_body.write().unwrap();
 
@@ -37,6 +37,7 @@ impl<'a> Client<'a> {
 
         // 4. Receive the response
         self.reactor.wait_for(res.subscribe()).await;
+
         // NOTE: the first `unwrap` is to ensure readiness, the second `unwrap`
         // is to trap if we try and get the response more than once. The final
         // `?` is to raise the actual error if there is one.

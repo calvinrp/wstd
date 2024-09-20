@@ -1,6 +1,6 @@
 use crate::io::{empty, Empty};
 
-use super::{Body, Headers, IntoBody, Method};
+use super::{Body, Headers, IntoBody, Method, Result};
 use url::Url;
 use wasi::http::outgoing_handler::OutgoingRequest;
 use wasi::http::types::Scheme;
@@ -50,8 +50,8 @@ impl<B: Body> Request<B> {
         }
     }
 
-    pub fn into_outgoing(self) -> (OutgoingRequest, B) {
-        let wasi_req = OutgoingRequest::new(self.headers);
+    pub fn into_outgoing(self) -> Result<(OutgoingRequest, B)> {
+        let wasi_req = OutgoingRequest::new(self.headers.try_into()?);
 
         // Set the HTTP method
         wasi_req.set_method(&self.method.into()).unwrap();
